@@ -1,7 +1,5 @@
 class ApplicationController < ActionController::API
-  protect_from_forgery with: :exception
-
-  def hello
-    render html: "hello, world!"
-  end
+  # APIモードでは使えないらしい
+  # protect_from_forgery with: :exception
+  include SessionsHelper
 end

@@ -2,8 +2,8 @@ class Api::V1::UsersController < ApplicationController
   include ActionController::HttpAuthentication::Token::ControllerMethods
 
   before_action :authenticate, only: [:index, :show, :update, :destroy]
-  before_action :set_user, only: [:show, :update, :destroy]
-  before_action :admin_user,     only: [:index, :destroy]
+  before_action :set_user, only: [:show, :update, :update_all, :destroy]
+  before_action :admin_user,     only: [:index, :update_all, :destroy]
 
   # 管理者のみ
   def index
@@ -17,12 +17,13 @@ class Api::V1::UsersController < ApplicationController
   end
 
   # 唯一認証必要なし
+  # 成功したら、アクセス許可がないことを返す
   def create
     user = User.new(user_params)
     if user.save
-      render json: { status: 'SUCCESS', user: user }
+      render json: { status: 'SUCCESS', data: user.activated }
     else
-      render json: { status: 'ERROR', user: user.errors }
+      render json: { status: 'ERROR', data: user.errors }
     end
   end
 
@@ -36,6 +37,15 @@ class Api::V1::UsersController < ApplicationController
       end
     else 
       render json: { status: 'ERROR', message: 'Not a proper user.' }
+    end
+  end
+
+  # 管理者のみ
+  def update_all
+    if @user.update(admin_params)
+        render json: { status: 'SUCCESS', message: 'Updated the user', user: @user }
+      else
+        render json: { status: 'ERROR', message: 'Not updated', user: @user.errors }
     end
   end
 
@@ -54,6 +64,10 @@ class Api::V1::UsersController < ApplicationController
 
     def user_params
       params.permit(:name, :password, :password_confirmation)
+    end
+
+    def admin_params
+      params.permit(:name, :activated, :admin)
     end
 
     def admin_user

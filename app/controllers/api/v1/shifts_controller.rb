@@ -14,8 +14,12 @@ class Api::V1::ShiftsController < ApplicationController
   # 自分 or 管理者
   # 自分のシフト
   def show
-    shifts = Shift.where(user_id: params[:id])
-    render json: { status: 'SUCCESS', message: 'Loaded the shift', shift: shifts }
+    if (shift.user_id == @auth_user.id) || @auth_user.admin?
+      shifts = Shift.where(user_id: params[:id])
+      render json: { status: 'SUCCESS', message: 'Loaded the shift', shift: shifts }
+    else
+      render json: { status: 'ERROR', message: 'Not a proper user.' } 
+    end
   end
 
   # 自分 or 管理者

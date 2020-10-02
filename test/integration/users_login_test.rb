@@ -5,17 +5,13 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
   def setup
     @user = users(:michael)
   end
-
-  # [TODO] fix login_path 
+ 
   test "login with invalid information" do
-    get login_path
-    post login_path, params: { session: { name: "", password: "" } }
+    post '/api/v1/login', params: { name: "", password: "" } 
   end
 
-  test "login with valid information followed by logout" do
-    get login_path
-    post login_path, params: { session: { name:    @user.name,
-                                          password: 'password' } }
-    delete logout_path
+  test "login with valid information" do
+    post '/api/v1/login', params: { name:    @user.name,
+                                    password: 'password' } 
   end
 end
